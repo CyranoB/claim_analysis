@@ -1,0 +1,105 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+.env/
+.venv/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local development settings
+.env
+.env.local
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Documentation
+docs/_build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Logs
+*.log
+
+# Database
+*.db
+*.sqlite3
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Profiling data
+*.prof
+*.pstat
+profile_results/
+
+# Dependency directories
+node_modules/  # If using any JavaScript/Node.js tools
+bower_components/
+
+# Local development
+local_settings.py
+*.local.py
+instance/
+
+# Backup files
+*.bak
+*.tmp
+*.temp
+*~
+
+# Media and static files (if managed outside of version control)
+media/
+static/
+uploads/
+
+# API keys and secrets
+*.pem
+*.key
+credentials.json
+client_secrets.json
+
+# Compiled translations
+*.mo
+*.pot
+
+# Redis
+dump.rdb
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+
+# Virtual machine
+.vagrant/
+

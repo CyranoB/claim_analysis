@@ -1,0 +1,12 @@
+smolagents
+markdownify
+python-dotenv
+litellm
+langfuse
+html2text
+pandas
+blobfile
+tavily-python
+click
+yt_dlp
+youtube_transcript_api
