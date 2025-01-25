@@ -10,3 +10,4 @@ tavily-python
 click
 yt_dlp
 youtube_transcript_api
+boto3

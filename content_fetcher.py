@@ -297,8 +297,9 @@ if __name__ == "__main__":
     )   
     urls = [
         "https://www.youtube.com/watch?v=Ub78DA8wyf8",
-        "https://narwhalproject.org/wp-content/uploads/2024/12/Class-of-2014.pdf",
-        "https://arxiv.org/html/2408.03314v1"
+        #"https://narwhalproject.org/wp-content/uploads/2024/12/Class-of-2014.pdf",
+        #"https://arxiv.org/html/2408.03314v1",
+        "https://www.youtube.com/watch?v=HGNdAW-inVg"
     ]
     
     def update_progress(current, total):

@@ -47,7 +47,8 @@ if __name__ == "__main__":
     test_urls = [
         "https://arxiv.org/html/2310.19923v4",
         "https://wolf-stuff.com/blogs/wolf-facts/bernards-wolf",
-        "https://www.youtube.com/watch?v=Ub78DA8wyf8"
+        "https://www.youtube.com/watch?v=Ub78DA8wyf8",
+        "https://www.youtube.com/watch?v=HGNdAW-inVg"
     ]
     
     # Test each URL

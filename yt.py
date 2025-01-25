@@ -56,15 +56,48 @@ class YouTubeTranscriptDownloader:
                 return parsed_url.path.split('/')[2]
         raise ValueError('Invalid YouTube URL')
 
-    def paginate_transcript(self, language: str = 'en') -> str:
+    def paginate_transcript(self, language: str = None) -> str:
         try:
             transcripts = YouTubeTranscriptApi.list_transcripts(self.video_id)
-            transcript = transcripts.find_transcript([language])
+            
+            # Get list of available transcripts
+            try:
+                manual_transcripts = transcripts._manually_created_transcripts
+                auto_transcripts = transcripts._generated_transcripts
+                all_langs = list(manual_transcripts.keys()) + list(auto_transcripts.keys())
+            except Exception as e:
+                all_langs = []
+            
+            # Try English first if no specific language requested
+            if not language:
+                try:
+                    if 'en' in all_langs:
+                        transcript = transcripts.find_transcript(['en'])
+                    else:
+                        # Get first available manual transcript
+                        if manual_transcripts:
+                            first_lang = list(manual_transcripts.keys())[0]
+                            transcript = transcripts.find_transcript([first_lang])
+                        # Fall back to auto-generated transcript
+                        elif auto_transcripts:
+                            first_lang = list(auto_transcripts.keys())[0]
+                            transcript = transcripts.find_transcript([first_lang])
+                        else:
+                            raise RuntimeError("No transcripts available")
+                except Exception as e:
+                    raise RuntimeError(f"Failed to find transcript: {str(e)}")
+            else:
+                # If specific language requested, try that
+                transcript = transcripts.find_transcript([language])
+            
             return ' '.join(entry['text'] for entry in transcript.fetch())
         except Exception as e:
-            raise RuntimeError(f"Failed to download transcript in {language}: {str(e)}")
+            error_msg = f"Failed to download transcript: {str(e)}"
+            if 'all_langs' in locals() and all_langs:
+                error_msg += f"\nAvailable languages: {', '.join(all_langs)}"
+            raise RuntimeError(error_msg)
 
-    def download_transcript(self, language: str = 'en', page_size: int = 1000) -> List[str]:
+    def download_transcript(self, language: str = None, page_size: int = 1000) -> List[str]:
         if page_size <= 0:
             raise ValueError("Page size must be positive")
         
@@ -72,38 +105,54 @@ class YouTubeTranscriptDownloader:
         return [transcript_text[i:i + page_size] for i in range(0, len(transcript_text), page_size)]
 
 @click.command()
-@click.argument('url')
-@click.option('--language', '-l', default='en', help='Language of the transcript (default: en)')
+@click.argument('urls', nargs=-1)  # Accept multiple URLs
+@click.option('--language', '-l', help='Language of the transcript (default: try English, then original language)')
 @click.option('--page-size', '-p', default=1000, help='Number of characters per page (default: 1000)')
-def main(url: str, language: str, page_size: int):
-    """Download and print the transcript of a YouTube video with pagination."""
-    try:
-        downloader = YouTubeTranscriptDownloader(url)
+def main(urls: tuple, language: str, page_size: int):
+    """Download and print transcripts of YouTube videos with pagination."""
+    if not urls:
+        # Test cases if no URLs provided
+        test_urls = [
+            "https://www.youtube.com/watch?v=dQw4w9WgXcQ",  # Rick Astley - Never Gonna Give You Up
+            "https://www.youtube.com/watch?v=jNQXAC9IVRw",  # Me at the zoo (First YouTube video)
+            "https://www.youtube.com/watch?v=HGNdAW-inVg",  # No 'en' transcript, 'fr'only
+        ]
+        urls = test_urls
+        click.echo("No URLs provided. Running test cases...\n")
+    
+    for url in urls:
+        click.echo(f"\nProcessing: {url}")
+        click.echo("-" * 50)
         
         try:
-            title = downloader.get_title()
-            click.echo(f"\nTitle: {title}")
-        except RuntimeError as e:
-            click.echo(f"Warning: {str(e)}", err=True)
-        
-        try:
-            description = downloader.get_description()
-            click.echo(f"\nDescription: {description}\n")
-        except RuntimeError as e:
-            click.echo(f"Warning: {str(e)}", err=True)
-
-        click.echo("Transcript:")
-        
-        pages = downloader.download_transcript(language, page_size)
-        for i, page in enumerate(pages, 1):
-            click.echo(page)
+            downloader = YouTubeTranscriptDownloader(url)
             
-    except ValueError as e:
-        click.echo(f"Invalid input: {str(e)}", err=True)
-        raise click.Abort()
-    except RuntimeError as e:
-        click.echo(f"Error: {str(e)}", err=True)
-        raise click.Abort()
+            try:
+                title = downloader.get_title()
+                click.echo(f"Title: {title}")
+            except RuntimeError as e:
+                click.echo(f"Warning: {str(e)}", err=True)
+            
+            try:
+                description = downloader.get_description()
+                click.echo(f"Description: {description}\n")
+            except RuntimeError as e:
+                click.echo(f"Warning: {str(e)}", err=True)
+
+            click.echo("Transcript:")
+            pages = downloader.download_transcript(language, page_size)
+            for i, page in enumerate(pages, 1):
+                click.echo(f"\nPage {i}:")
+                click.echo(page)
+                
+        except ValueError as e:
+            click.echo(f"Invalid input: {str(e)}", err=True)
+            continue
+        except RuntimeError as e:
+            click.echo(f"Error: {str(e)}", err=True)
+            continue
+        
+        click.echo("\n" + "="*50 + "\n")  # Separator between videos
 
 if __name__ == "__main__":
     main()
